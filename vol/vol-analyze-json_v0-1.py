@@ -10,27 +10,21 @@
 
 #### IMPORTS ##############
 
-import sys, getopt, subprocess
+import sys, getopt, subprocess, os, errno
 from datetime import datetime
 
 
 #### CODE START ############
 
 def main(argv):
-
-    #### Variables
-
-	TimeStampFormat = '%Y-%m-%d_%H-%M-%S'
-	analysis_timestamp = datetime.now().strftime(TimeStampFormat)
     
-
-    #### INPUTS 
+    #### Inputs 
 
 	VolFile = ''                # Path to vol.py
 	ImageFile = ''              # Input file (mem. dump)
 	InputImageProfile = ''      # Input image profile (e.g. Win10x64_15063)
     # OutputPath = ''           # Specify output path 
-    
+  
 	try:
 		opts, args = getopt.getopt(argv,"hv:i:p:",["vfile=","ifile=","iiprofile="])
 	except getopt.GetoptError:
@@ -46,27 +40,50 @@ def main(argv):
 			ImageFile = arg
 		elif opt in ("-p", "--iiprofile"):
 			InputImageProfile = arg
-	print 'Using vol.py at: ', VolFile
-	print 'Input file: ', ImageFile
-	print 'Input image profile: ', InputImageProfile
+            
+  
+    #### Configurations
 
-	
+    TimeStampFormat = '%Y-%m-%d_%H-%M-%S'
+    OutputDir = datetime.now().strftime(TimeStampFormat)+'/'
+            
+
+    #### Prepare execution
+            
+    print datetime.now().strftime(TimeStampFormat),'Using vol.py at: ', VolFile
+	print datetime.now().strftime(TimeStampFormat),'Input file: ', ImageFile
+	print datetime.now().strftime(TimeStampFormat),'Input image profile: ', InputImageProfile
+   
+    try: # Checking and creating output folder
+        os.makedirs(OutputDir)
+        print datetime.now().strftime(TimeStampFormat),'Output dir: ', OutputDir
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+            
+    
 	#### Executing functions 
-	
+    
 	print datetime.now().strftime(TimeStampFormat),'Analysis starting...'
 
 
 	# PSLIST
 	print datetime.now().strftime(TimeStampFormat),'Task start: PSLIST'
-	PslistCmd = 'python '+VolFile+' pslist -f '+ImageFile+' --profile='+InputImageProfile+' --output=json --output-file='+datetime.now().strftime(TimeStampFormat)+'-pslist.json'
+	PslistCmd = 'python '+VolFile+' pslist -f '+ImageFile+' --profile='+InputImageProfile+'--output=json --output-file='+OutputDir+datetime.now().strftime(TimeStampFormat)+'-pslist.json'
 	subprocess.call(PslistCmd, shell=True) 
 	print datetime.now().strftime(TimeStampFormat),'Task complete: PSLIST'
 
 	# PSSCAN
 	print datetime.now().strftime(TimeStampFormat),'Task start: PSSCAN'
-	PsscanCmd = 'python '+VolFile+' psscan -f '+ImageFile+' --profile='+InputImageProfile+' --output=json --output-file='+datetime.now().strftime(TimeStampFormat)+'-psscan.json'
+	PsscanCmd = 'python '+VolFile+' psscan -f '+ImageFile+' --profile='+InputImageProfile+'--output=json --output-file='+OutputDir+datetime.now().strftime(TimeStampFormat)+'-psscan.json'
 	subprocess.call(PsscanCmd, shell=True) 
 	print datetime.now().strftime(TimeStampFormat),'Task complete: PSSCAN'
+
+	# LDRMODULES
+	# print datetime.now().strftime(TimeStampFormat),'Task start: LDRMODULES'
+	# LdrmodulesCmd = 'python '+VolFile+' ldrmodules -f '+ImageFile+' --profile='+InputImageProfile+' '+OutputConfig+'-ldrmodules.json'
+	# subprocess.call(LdrmodulesCmd, shell=True) 
+	# print datetime.now().strftime(TimeStampFormat),'Task complete: LDRMODULES'
 
 
     #### SCRIPT COMPLETE 
