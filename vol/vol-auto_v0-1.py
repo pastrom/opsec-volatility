@@ -74,7 +74,7 @@ def main(argv):
 		if e.errno != errno.EEXIST:
 			raise
 
-	print datetime.now().strftime(TimeStampFormat)+'Output DB file: '+OutputDir+OutputFile
+	print datetime.now().strftime(TimeStampFormat)+' Output DB file: '+OutputDir+OutputFile
 
 	#### Executing functions 
 
