@@ -17,8 +17,11 @@ from datetime import datetime
 #### Configurations
 
 TimeStampFormat = '%Y-%m-%d_%H-%M'
+
+# Output settings
 OutputDir = datetime.now().strftime(TimeStampFormat)+'/'
 OutputFile = 'vol-auto-results_'+datetime.now().strftime(TimeStampFormat)+'.db'
+OutputCnfg = '--output=sqlite --output-file='+OutputDir+OutputFile
 
 # Functions
 DoPslist = 'no'
@@ -44,11 +47,11 @@ def main(argv):
 	try:
 		opts, args = getopt.getopt(argv,"hv:i:p:",["vfile=","ifile=","iiprofile="])
 	except getopt.GetoptError:
-		print 'vol-analyze-json.py -v <path to vol.py> -i <inputfile> -p <image-profile>'
+		print 'vol-auto.py -v <path to vol.py> -i <inputfile> -p <image-profile>'
 		sys.exit('Script fail')
 	for opt, arg in opts:
 		if opt == '-h':
-			print 'vol-analyze-json.py -v <path-to-vol.py> -i <inputfile> -p <image-profile>'
+			print 'vol-auto.py -v <path-to-vol.py> -i <inputfile> -p <image-profile>'
 			sys.exit('Help command.')
 		elif opt in ("-v", "--vfile"):
 			VolFile = arg
@@ -80,49 +83,49 @@ def main(argv):
 	# PSLIST
 	if DoPslist == "yes":
 		print datetime.now().strftime(TimeStampFormat),'Task start: PSLIST'
-		PslistCmd = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' --output=sqlite --output-file='+OutputDir+datetime.now().strftime(TimeStampFormat)+'-pslist.db pslist'
+		PslistCmd = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' '+OutputCnfg+' pslist'
 		subprocess.call(PslistCmd, shell=True) 
 		print datetime.now().strftime(TimeStampFormat),'Task complete: PSLIST'
 
 	# PSSCAN
 	if DoPsscan == "yes":
 		print datetime.now().strftime(TimeStampFormat),'Task start: PSSCAN'
-		PsscanCmd = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' --output=sqlite --output-file='+OutputDir+datetime.now().strftime(TimeStampFormat)+'-psscan.db psscan'
+		PsscanCmd = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' '+OutputCnfg+' psscan'
 		subprocess.call(PsscanCmd, shell=True) 
 		print datetime.now().strftime(TimeStampFormat),'Task complete: PSSCAN'
 		
 	# PSXVIEW
 	if DoPsxview == "yes":
 		print datetime.now().strftime(TimeStampFormat),'Task start: PSXVIEW'
-		Psxview = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' --output=sqlite --output-file='+OutputDir+datetime.now().strftime(TimeStampFormat)+'-psxview.db psxview'
+		Psxview = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' '+OutputCnfg+' psxview'
 		subprocess.call(Psxview, shell=True) 
 		print datetime.now().strftime(TimeStampFormat),'Task complete: PSXVIEW'
 
 	# LDRMODULES
 	if DoLdrmodules == "yes":
 		print datetime.now().strftime(TimeStampFormat),'Task start: LDRMODULES'
-		LdrmodulesCmd = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' --output=sqlite --output-file='+OutputDir+datetime.now().strftime(TimeStampFormat)+'-ldrmodules.db ldrmodules'
+		LdrmodulesCmd = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' '+OutputCnfg+' ldrmodules'
 		subprocess.call(LdrmodulesCmd, shell=True) 
 		print datetime.now().strftime(TimeStampFormat),'Task complete: LDRMODULES'
 		
 	# APIHOOKS
 	if DoApihooks == "yes":
 		print datetime.now().strftime(TimeStampFormat),'Task start: APIHOOKS'
-		ApihooksCmd = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' --output=sqlite --output-file='+OutputDir+datetime.now().strftime(TimeStampFormat)+'-apihooks.db apihooks'
+		ApihooksCmd = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' '+OutputCnfg+' apihooks'
 		subprocess.call(ApihooksCmd, shell=True) 
 		print datetime.now().strftime(TimeStampFormat),'Task complete: APIHOOKS'
 	
 	# SVCSCAN
 	if DoSvcscan == "yes":
 		print datetime.now().strftime(TimeStampFormat),'Task start: SVCSCAN'
-		SvcscanCmd = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' --output=sqlite --output-file='+OutputDir+datetime.now().strftime(TimeStampFormat)+'-svcscan.db svcscan'
+		SvcscanCmd = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' '+OutputCnfg+'  svcscan'
 		subprocess.call(SvcscanCmd, shell=True) 
 		print datetime.now().strftime(TimeStampFormat),'Task complete: SVCSCAN'
 	
 	# DEVICETREE
 	if DoDevicetree == "yes":
 		print datetime.now().strftime(TimeStampFormat),'Task start: DEVICETREE'
-		DevicetreeCmd = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' --output=sqlite --output-file='+OutputDir+datetime.now().strftime(TimeStampFormat)+'-devicetree.db devicetree'
+		DevicetreeCmd = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' '+OutputCnfg+' devicetree'
 		subprocess.call(DevicetreeCmd, shell=True) 
 		print datetime.now().strftime(TimeStampFormat),'Task complete: DEVICETREE'
 	
@@ -134,7 +137,7 @@ def main(argv):
 			os.makedirs(OutputDir+'malfind-output/')
 		
 			print datetime.now().strftime(TimeStampFormat),'Task start: MALFIND'
-			MalfindCmd = 'python '+VolFile+' -f '+ImageFile+' -D '+OutputDir+'malfind-output/ --profile='+InputImageProfile+' --output=sqlite --output-file='+OutputDir+datetime.now().strftime(TimeStampFormat)+'-malfind.db malfind'
+			MalfindCmd = 'python '+VolFile+' -f '+ImageFile+' -D '+OutputDir+'malfind-output/ --profile='+InputImageProfile+' '+OutputCnfg+'  malfind'
 			subprocess.call(MalfindCmd, shell=True) 
 			print datetime.now().strftime(TimeStampFormat),'Task complete: MALFIND'
 			
