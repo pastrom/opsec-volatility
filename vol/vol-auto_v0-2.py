@@ -26,7 +26,7 @@ OutputCnfg = '--output=sqlite --output-file='+OutputDir+OutputFile
 # Volatility plugins
 
 pluginCnfg = 	[	['pslist',	'psscan',	'psxview',	'ldrmodules',	'apihooks',	'malfind',	'svcscan',	'devicetree'],
-					['no',		'no',		'no',		'yes',			'no',		'no',		'no',		'no']
+					['no',		'no',		'no',		'no',			'no',		'no',		'no',		'no']
 				]
 
 #### CODE START 
