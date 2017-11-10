@@ -7,7 +7,6 @@
 #
 #
 
-
 #### IMPORTS
 
 import sys, getopt, subprocess, os, errno
@@ -19,33 +18,21 @@ from datetime import datetime
 TimeStampFormat = '%Y-%m-%d_%H-%M'
 
 # Output settings
+
 OutputDir = datetime.now().strftime(TimeStampFormat)+'/'
 OutputFile = 'vol-auto-results_'+datetime.now().strftime(TimeStampFormat)+'.db'
 OutputCnfg = '--output=sqlite --output-file='+OutputDir+OutputFile
 
-# Functions
-DoPslist = 'no'
-DoPsscan = 'no'
-DoPsxview = "no"
-DoLdrmodules = 'no'
-DoApihooks = 'no'
-DoMalfind = 'no'
-DoSvcscan = 'no'
-DoDevicetree = 'no'
+# Volatility plugins
 
 pluginCnfg = 	[	['pslist',	'psscan',	'psxview',	'ldrmodules',	'apihooks',	'malfind',	'svcscan',	'devicetree'],
-					['no',		'no',		'no','		','no',			'no',		'no',		'no',		'no']
+					['no',		'no',		'no',		'yes',			'no',		'no',		'no',		'no']
 				]
-
-for i in range(len(pluginCnfg[0])):
-	if pluginCnfg[1][i] == "yes":
-		print pluginCnfg[0][i]
-
 
 #### CODE START 
 
 def main(argv):
-    
+	
     #### Inputs 
 
 	VolFile = ''                # Path to vol.py
@@ -88,72 +75,28 @@ def main(argv):
 
 	print datetime.now().strftime(TimeStampFormat),'Analysis starting...'
 
-	# PSLIST
-	if DoPslist == "yes":
-		print datetime.now().strftime(TimeStampFormat),'Task start: PSLIST'
-		PslistCmd = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' '+OutputCnfg+' pslist'
-		subprocess.call(PslistCmd, shell=True) 
-		print datetime.now().strftime(TimeStampFormat),'Task complete: PSLIST'
+	cmdString = ''
 
-	# PSSCAN
-	if DoPsscan == "yes":
-		print datetime.now().strftime(TimeStampFormat),'Task start: PSSCAN'
-		PsscanCmd = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' '+OutputCnfg+' psscan'
-		subprocess.call(PsscanCmd, shell=True) 
-		print datetime.now().strftime(TimeStampFormat),'Task complete: PSSCAN'
-		
-	# PSXVIEW
-	if DoPsxview == "yes":
-		print datetime.now().strftime(TimeStampFormat),'Task start: PSXVIEW'
-		Psxview = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' '+OutputCnfg+' psxview'
-		subprocess.call(Psxview, shell=True) 
-		print datetime.now().strftime(TimeStampFormat),'Task complete: PSXVIEW'
-
-	# LDRMODULES
-	if DoLdrmodules == "yes":
-		print datetime.now().strftime(TimeStampFormat),'Task start: LDRMODULES'
-		LdrmodulesCmd = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' '+OutputCnfg+' ldrmodules'
-		subprocess.call(LdrmodulesCmd, shell=True) 
-		print datetime.now().strftime(TimeStampFormat),'Task complete: LDRMODULES'
-		
-	# APIHOOKS
-	if DoApihooks == "yes":
-		print datetime.now().strftime(TimeStampFormat),'Task start: APIHOOKS'
-		ApihooksCmd = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' '+OutputCnfg+' apihooks'
-		subprocess.call(ApihooksCmd, shell=True) 
-		print datetime.now().strftime(TimeStampFormat),'Task complete: APIHOOKS'
-	
-	# SVCSCAN
-	if DoSvcscan == "yes":
-		print datetime.now().strftime(TimeStampFormat),'Task start: SVCSCAN'
-		SvcscanCmd = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' '+OutputCnfg+'  svcscan'
-		subprocess.call(SvcscanCmd, shell=True) 
-		print datetime.now().strftime(TimeStampFormat),'Task complete: SVCSCAN'
-	
-	# DEVICETREE
-	if DoDevicetree == "yes":
-		print datetime.now().strftime(TimeStampFormat),'Task start: DEVICETREE'
-		DevicetreeCmd = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' '+OutputCnfg+' devicetree'
-		subprocess.call(DevicetreeCmd, shell=True) 
-		print datetime.now().strftime(TimeStampFormat),'Task complete: DEVICETREE'
-	
-	# malfind
-	if DoMalfind == "yes":
-		
-		try: # Checking and creating output folder
-		
-			os.makedirs(OutputDir+'malfind-output/')
-		
-			print datetime.now().strftime(TimeStampFormat),'Task start: MALFIND'
-			MalfindCmd = 'python '+VolFile+' -f '+ImageFile+' -D '+OutputDir+'malfind-output/ --profile='+InputImageProfile+' '+OutputCnfg+'  malfind'
-			subprocess.call(MalfindCmd, shell=True) 
-			print datetime.now().strftime(TimeStampFormat),'Task complete: MALFIND'
+	for i in range(len(pluginCnfg[0])):
+		if pluginCnfg[1][i] == "yes":
+			print datetime.now().strftime(TimeStampFormat),'Task start:', pluginCnfg[0][i]
 			
-		except OSError as e:
-			if e.errno != errno.EEXIST:
-				raise
+			cmdString = 'python '+VolFile+' -f '+ImageFile+' --profile='+InputImageProfile+' '+OutputCnfg+' '+pluginCnfg[0][i]
 			
-
+			if pluginCnfg[0][i] == "malfind":
+			
+				try: # Checking and creating output folder
+					os.makedirs(OutputDir+'malfind-output/')
+				except OSError as e:
+					if e.errno != errno.EEXIST:
+						raise
+			
+				cmdString = cmdString+' -D '+OutputDir+'malfind-output/' 
+			
+			subprocess.call(cmdString, shell=True) 
+			
+			print datetime.now().strftime(TimeStampFormat),'Task complete:', pluginCnfg[0][i]
+			
 	print datetime.now().strftime(TimeStampFormat),'Analysis complete!' # todo: check if functions returned without errors
 
 
